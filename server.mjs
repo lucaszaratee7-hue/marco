@@ -23,7 +23,23 @@ function setPassword(password) {
   const salt = randomBytes(16).toString('hex');
   db.prepare('INSERT OR REPLACE INTO admins VALUES(?,?,?)').run('admin', salt, passwordHash(password, salt));
 }
-if (!db.prepare('SELECT username FROM admins').get()) {
+if (process.env.ADMIN_PASSWORD) {
+    if (process.env.ADMIN_PASSWORD.length < 16) {
+        throw new Error('ADMIN_PASSWORD requiere 16 caracteres como mínimo.');
+    }
+
+    setPassword(process.env.ADMIN_PASSWORD);
+
+} else if (!db.prepare('SELECT username FROM admins').get()) {
+    const password = randomBytes(24).toString('base64url');
+
+    setPassword(password);
+
+    writeFileSync(
+        passwordFile,
+        `Usuario: admin\nContraseña: ${password}\nCambiala desde /admin.`
+    );
+}
   const password = process.env.ADMIN_PASSWORD || randomBytes(24).toString('base64url');
   if (password.length < 16) throw new Error('ADMIN_PASSWORD requiere 16 caracteres como mínimo.');
   setPassword(password);
