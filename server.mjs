@@ -165,6 +165,6 @@ export const server = http.createServer(async(req, res) => {
   } catch(error) { if(!error.status) console.error(error); if(!res.headersSent) json(res, error.status || 500, {error:error.status ? error.message : 'Ocurrió un error. Intentá nuevamente.'}); else res.end(); }
 });
 server.requestTimeout = 30000;
-server.listen(port, process.env.HOST || '127.0.0.1', () => console.log(`Sitio: ${origin}\nPanel: ${origin}/admin\nCredenciales iniciales: ${passwordFile}`));
+server.listen(port, process.env.HOST || '0.0.0.0', () => console.log(`Sitio: ${origin}\nPanel: ${origin}/admin\nCredenciales iniciales: ${passwordFile}`));
 function shutdown() { for(const stream of streams) stream.end(); server.close(()=>{ db.close(); process.exit(0); }); }
 process.on('SIGTERM', shutdown); process.on('SIGINT', shutdown);
