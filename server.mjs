@@ -40,11 +40,7 @@ if (process.env.ADMIN_PASSWORD) {
         `Usuario: admin\nContraseña: ${password}\nCambiala desde /admin.`
     );
 }
-  const password = process.env.ADMIN_PASSWORD || randomBytes(24).toString('base64url');
-  if (password.length < 16) throw new Error('ADMIN_PASSWORD requiere 16 caracteres como mínimo.');
-  setPassword(password);
-  if (!process.env.ADMIN_PASSWORD) writeFileSync(passwordFile, `Usuario: admin\nContraseña: ${password}\nCambiala desde /admin. Este archivo se elimina al cambiarla.\n`, { mode: 0o600 });
-}
+  
 const port = Number(process.env.PORT || 3000);
 const origin = process.env.APP_ORIGIN || `http://localhost:${port}`;
 const originURL = new URL(origin);
