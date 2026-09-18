@@ -26,13 +26,25 @@ function render(c) {
     event.preventDefault(); const form=event.currentTarget, button=form.querySelector('button[type=submit]'), status=document.querySelector('#contact-status');
     button.disabled=true; button.textContent=c.form.sending; status.textContent='';
     try { const values=Object.fromEntries(new FormData(form)); values.consent=form.elements.consent.checked;
-      const response=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(values)});
+      const response=await fetch('https://marco-zrle.onrender.com/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(values)});
       const result=await response.json(); if(!response.ok) throw new Error(result.error); form.reset();status.textContent=c.form.success;
     } catch(err) { status.textContent=err.message || c.form.error; } finally {button.disabled=false; button.textContent=c.form.submit;}
-  };
-}
-async function load(){const r=await fetch('/api/content');if(!r.ok)throw new Error('No se pudo cargar el sitio.');const data=await r.json();render(JSON.parse(data.json));}
 load().catch(()=>{document.querySelector('#site').innerHTML='<main class="loading"><h1>No pudimos cargar el sitio.</h1><p>Recargá la página o escribí a <a href="mailto:z.marcozarate@gmail.com">z.marcozarate@gmail.com</a>.</p></main>';});
-const events=new EventSource('/api/events');events.onmessage=()=>load().catch(()=>{});
-window.addEventListener('pageshow',event=>{if(event.persisted)load().catch(()=>{});});
+async function load(){
+    const r = await fetch('/content.json');
 
+    if(!r.ok) {
+        throw new Error('No se pudo cargar el sitio.');
+    }
+
+    const data = await r.json();
+    render(data);
+}
+
+load().catch(()=>{
+    document.querySelector('#site').innerHTML='<main class="loading"><h1>No pudimos cargar el sitio.</h1><p>Recargá la página o escribí a <a href="mailto:z.marcozarate@gmail.com">z.marcozarate@gmail.com</a>.</p></main>';
+});
+
+window.addEventListener('pageshow',event=>{
+    if(event.persisted) load().catch(()=>{});
+});
