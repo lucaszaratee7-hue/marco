@@ -22,14 +22,43 @@ function render(c) {
   document.querySelector('.menu').onclick = event => {const on=event.currentTarget.getAttribute('aria-expanded')==='true'; event.currentTarget.setAttribute('aria-expanded',String(!on)); document.querySelector('nav').classList.toggle('open',!on);};
   document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{document.querySelector('nav').classList.remove('open');document.querySelector('.menu').setAttribute('aria-expanded','false');});
   const dialog=document.querySelector('#privacy'); document.querySelector('#privacy-open').onclick=()=>dialog.showModal(); document.querySelector('#privacy-close').onclick=()=>dialog.close();
-  document.querySelector('#contact-form').onsubmit = async event => {
-    event.preventDefault(); const form=event.currentTarget, button=form.querySelector('button[type=submit]'), status=document.querySelector('#contact-status');
-    button.disabled=true; button.textContent=c.form.sending; status.textContent='';
-    try { const values=Object.fromEntries(new FormData(form)); values.consent=form.elements.consent.checked;
-      const response=await fetch('https://marco-zrle.onrender.com/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(values)});
-      const result=await response.json(); if(!response.ok) throw new Error(result.error); form.reset();status.textContent=c.form.success;
-    } catch(err) { status.textContent=err.message || c.form.error; } finally {button.disabled=false; button.textContent=c.form.submit;}
-load().catch(()=>{document.querySelector('#site').innerHTML='<main class="loading"><h1>No pudimos cargar el sitio.</h1><p>Recargá la página o escribí a <a href="mailto:z.marcozarate@gmail.com">z.marcozarate@gmail.com</a>.</p></main>';});
+ document.querySelector('#contact-form').onsubmit = async event => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type=submit]');
+    const status = document.querySelector('#contact-status');
+
+    button.disabled = true;
+    button.textContent = c.form.sending;
+    status.textContent = '';
+
+    try {
+        const values = Object.fromEntries(new FormData(form));
+        values.consent = form.elements.consent.checked;
+
+        const response = await fetch('https://marco-zrle.onrender.com/api/contact', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(values)
+        });
+
+        const result = await response.json();
+
+        if(!response.ok) throw new Error(result.error);
+
+        form.reset();
+        status.textContent = c.form.success;
+
+    } catch(err) {
+        status.textContent = err.message || c.form.error;
+
+    } finally {
+        button.disabled = false;
+        button.textContent = c.form.submit;
+    }
+};
+}
 async function load(){
     const r = await fetch('/content.json');
 
@@ -41,10 +70,15 @@ async function load(){
     render(data);
 }
 
-load().catch(()=>{
-    document.querySelector('#site').innerHTML='<main class="loading"><h1>No pudimos cargar el sitio.</h1><p>Recargá la página o escribí a <a href="mailto:z.marcozarate@gmail.com">z.marcozarate@gmail.com</a>.</p></main>';
+load().catch((err)=>{
+    console.error(err);
+
+    document.querySelector('#site').innerHTML =
+        '<main class="loading"><h1>No pudimos cargar el sitio.</h1><p>Recargá la página o escribí a <a href="mailto:z.marcozarate@gmail.com">z.marcozarate@gmail.com</a>.</p></main>';
 });
 
-window.addEventListener('pageshow',event=>{
-    if(event.persisted) load().catch(()=>{});
+window.addEventListener('pageshow', (event)=>{
+    if(event.persisted) {
+        load().catch(console.error);
+    }
 });
